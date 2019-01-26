@@ -1,0 +1,19 @@
+td.floor {
+    background-color: red;
+    color: red;
+}
+
+td.stair {
+    background-color: yellow;
+    color: yellow;
+}
+
+td.walkable {
+  background-color: black;
+  color: black;
+}
+
+td.air, table {
+    background-color: black;
+    color: black;
+}
