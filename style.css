@@ -8,12 +8,12 @@ td.stair {
     color: yellow;
 }
 
-td.walkable {
-  background-color: black;
-  color: black;
+td.background {
+	background-color: black;
+	color: black;
 }
 
-td.air, table {
-    background-color: black;
-    color: black;
+td.player {
+	background-color: green;
+	color: green;
 }
