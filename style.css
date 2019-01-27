@@ -17,3 +17,8 @@ td.player {
 	background-color: green;
 	color: green;
 }
+
+td.enemy {
+    background-color: blue;
+	color: blue;
+}

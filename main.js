@@ -10,6 +10,26 @@ var playerC = "player";
 var backgroundC = "background";
 var stairC = "stair";
 var floorC = "floor";
+var enemyC = "enemy";
+
+enemies = [];
+enemiesIndex = 0;
+
+var enemyStatus = {"toRight": 0, "fallingThenRight": 1, "toLeft": 2, "fallingThenLeft": 3};
+
+function Enemy(pos, status, index) {
+	this.pos = pos;
+	this.status = status;
+	this.index = index;
+	this.swapPosition = function(nextPos){
+		$(this.pos).toggleClass(enemyC);
+		this.pos = nextPos;
+		$(this.pos).toggleClass(enemyC);
+	};
+	this.delete = function(){
+		$(this.pos).removeClass(enemyC);
+	}
+}
 
 function generateRandomPositionStair(){
 		var res = [];
@@ -177,6 +197,67 @@ function resolveJumping() {
 	}
 }
 
+function getRandomTime() {
+	return Math.round(Math.random() * 2000) + 4500;
+}
+
+function updateEnemies() {
+	$(enemies).each(function(index, enemy) {
+		switch (enemy.status) {
+			case enemyStatus.toRight:
+				var nextPos = $(enemy.pos).next("td");
+				if(nextPos.length == 0) {
+					enemy.delete();
+					console.log("byee");
+				} else {
+					enemy.swapPosition(nextPos);
+					if(!nextPos.hasClass(walkable)) {
+						enemy.status = enemyStatus.fallingThenLeft;
+					}
+				}
+				break;
+			case enemyStatus.fallingThenLeft:
+				var nextPos = $(enemy.pos).parent("tr").next("tr").children('td:nth-child(' + ($(enemy.pos).prevAll("td").length + 1) + ')');
+				enemy.swapPosition(nextPos);
+				if(nextPos.hasClass(walkable)) {
+					enemy.status = enemyStatus.toLeft;
+				}
+				break;
+			case enemyStatus.toLeft:
+				var nextPos = $(enemy.pos).prev("td");
+				if(nextPos.length == 0) {
+					enemy.delete();
+					console.log("byee");
+				} else {
+					enemy.swapPosition(nextPos);
+					if(!nextPos.hasClass(walkable)) {
+						enemy.status = enemyStatus.fallingThenRight;
+					}
+				}
+				break;
+			case enemyStatus.fallingThenRight:
+				var nextPos = $(enemy.pos).parent("tr").next("tr").children('td:nth-child(' + ($(enemy.pos).prevAll("td").length + 1) + ')');
+				enemy.swapPosition(nextPos);
+				if(nextPos.hasClass(walkable)) {
+					enemy.status = enemyStatus.toRight;
+				}
+				break;
+			default:
+		}
+	});
+}
+
+function createEnemy() {
+	enemies[enemiesIndex] = new Enemy($("table tr:nth-child(" + height + ") td:first-child"), enemyStatus.toRight, enemiesIndex);
+	$(enemies[enemiesIndex].pos).addClass(enemyC);
+	enemiesIndex++;
+
+	setTimeout(function() {
+		createEnemy();
+	}, getRandomTime());
+}
+
+
 $(document).ready(function() {
 		$("div.matchResult").hide();
 		generateMap();
@@ -190,8 +271,7 @@ $(document).ready(function() {
 			eventRecorded = event.keyCode;
 		});
 
-		setInterval(function(){
-				console.log(jumpCurrentStatus);
+		setInterval(function() {
 			if(jumpCurrentStatus == jumpStatus.floating || jumpCurrentStatus == jumpStatus.none) {
 				resolveInputs();
 				if(jumpCurrentStatus == jumpStatus.floating) {
@@ -200,5 +280,10 @@ $(document).ready(function() {
 			} else {
 				resolveJumping();
 			}
-		}, 100);
+			updateEnemies();
+		}, 50);
+
+		setTimeout(function() {
+			createEnemy();
+		}, getRandomTime());
 });
