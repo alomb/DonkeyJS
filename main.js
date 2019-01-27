@@ -105,46 +105,76 @@ function generateMap() {
 
 var eventRecorded;
 var playerPos;
+var jumpStatus = {"none": 0, "jumping": 1, "floating": 2, "falling": 3};
+Object.freeze(jumpStatus);
+var jumpCurrentStatus = jumpStatus.none;
+
+function swapPosition(nextPos) {
+	$(playerPos).toggleClass(playerC);
+	playerPos = nextPos;
+	$(playerPos).toggleClass(playerC);
+}
 
 function resolveInputs() {
-	console.log(eventRecorded);
 	switch(eventRecorded) {
 		/*RIGHT*/
 		case 39:
-			if($(playerPos).next("td").hasClass(walkable) && $(playerPos).next("td")) {
-				$(playerPos).toggleClass(playerC);
-				playerPos = $(playerPos).next("td");
-				$(playerPos).toggleClass(playerC);
+			var nextPos = $(playerPos).next("td");
+			if(nextPos.length > 0 && nextPos.hasClass(walkable)) {
+				swapPosition(nextPos);
+			} else if(nextPos.length > 0) {
+				jumpCurrentStatus = jumpStatus.falling;
+				swapPosition(nextPos)
 			}
 		break;
 		/*LEFT*/
 		case 37:
-			if($(playerPos).prev("td").hasClass(walkable) && $(playerPos).prev("td")) {
-				$(playerPos).toggleClass(playerC);
-				playerPos = $(playerPos).prev("td");
-				$(playerPos).toggleClass(playerC);
+			var nextPos = $(playerPos).prev("td");
+			if(nextPos.length > 0 && nextPos.hasClass(walkable)) {
+				swapPosition(nextPos)
+			} else if(nextPos.length > 0) {
+				jumpCurrentStatus = jumpStatus.falling;
+				swapPosition(nextPos)
 			}
 		break;
 		/*UP*/
 		case 38:
 			var nextPos = $(playerPos).parent("tr").prev("tr").children('td:nth-child(' + ($(playerPos).prevAll("td").length + 1) + ')');
 			if($(nextPos).hasClass(walkable)) {
-				$(playerPos).toggleClass(playerC);
-				playerPos = nextPos;
-				$(playerPos).toggleClass(playerC);
+				swapPosition(nextPos)
+			} else if(jumpCurrentStatus == jumpStatus.none) {
+				jumpCurrentStatus = jumpStatus.jumping;
+				swapPosition(nextPos)
 			}
 		break;
 		/*DOWN*/
 		case 40:
 			var nextPos = $(playerPos).parent("tr").next("tr").children('td:nth-child(' + ($(playerPos).prevAll("td").length + 1) + ')');
 			if($(nextPos).hasClass(walkable)) {
-				$(playerPos).toggleClass(playerC);
-				playerPos = nextPos;
-				$(playerPos).toggleClass(playerC);
+				swapPosition(nextPos)
 			}
 		break;
 	}
+
 	eventRecorded = undefined;
+}
+
+function resolveJumping() {
+	if(jumpCurrentStatus == jumpStatus.falling) {
+		eventRecorded = undefined;
+		if($(playerPos).hasClass(walkable)) {
+			jumpCurrentStatus = jumpStatus.none;
+		} else {
+			var nextPos = $(playerPos).parent("tr").next("tr").children('td:nth-child(' + ($(playerPos).prevAll("td").length + 1) + ')');
+			swapPosition(nextPos)
+			if($(playerPos).hasClass(walkable)) {
+				jumpCurrentStatus = jumpStatus.none;
+			}
+		}
+
+	} else if(jumpCurrentStatus == jumpStatus.jumping) {
+		jumpCurrentStatus = jumpStatus.floating;
+	}
 }
 
 $(document).ready(function() {
@@ -161,6 +191,14 @@ $(document).ready(function() {
 		});
 
 		setInterval(function(){
-			resolveInputs();
+				console.log(jumpCurrentStatus);
+			if(jumpCurrentStatus == jumpStatus.floating || jumpCurrentStatus == jumpStatus.none) {
+				resolveInputs();
+				if(jumpCurrentStatus == jumpStatus.floating) {
+					jumpCurrentStatus = jumpStatus.falling;
+				}
+			} else {
+				resolveJumping();
+			}
 		}, 100);
 });
