@@ -13,14 +13,13 @@ var floorC = "floor";
 var enemyC = "enemy";
 
 enemies = [];
-enemiesIndex = 0;
 
 var enemyStatus = {"toRight": 0, "fallingThenRight": 1, "toLeft": 2, "fallingThenLeft": 3};
 
-function Enemy(pos, status, index) {
+function Enemy(pos, status, alive) {
 	this.pos = pos;
 	this.status = status;
-	this.index = index;
+	this.alive = alive;
 	this.swapPosition = function(nextPos){
 		$(this.pos).toggleClass(enemyC);
 		this.pos = nextPos;
@@ -28,6 +27,7 @@ function Enemy(pos, status, index) {
 	};
 	this.delete = function(){
 		$(this.pos).removeClass(enemyC);
+		this.alive = false;
 	}
 }
 
@@ -208,7 +208,6 @@ function updateEnemies() {
 				var nextPos = $(enemy.pos).next("td");
 				if(nextPos.length == 0) {
 					enemy.delete();
-					console.log("byee");
 				} else {
 					enemy.swapPosition(nextPos);
 					if(!nextPos.hasClass(walkable)) {
@@ -227,7 +226,6 @@ function updateEnemies() {
 				var nextPos = $(enemy.pos).prev("td");
 				if(nextPos.length == 0) {
 					enemy.delete();
-					console.log("byee");
 				} else {
 					enemy.swapPosition(nextPos);
 					if(!nextPos.hasClass(walkable)) {
@@ -247,13 +245,19 @@ function updateEnemies() {
 	});
 }
 
-function createEnemy() {
-	enemies[enemiesIndex] = new Enemy($("table tr:nth-child(" + height + ") td:first-child"), enemyStatus.toRight, enemiesIndex);
-	$(enemies[enemiesIndex].pos).addClass(enemyC);
-	enemiesIndex++;
+function filterAliveEnemies(enemy) {
+	return enemy.alive;
+}
+
+function updateEnemyNumber() {
+	enemies = enemies.filter(filterAliveEnemies);
+
+	var newEnemy = new Enemy($("table tr:nth-child(" + height + ") td:first-child"), enemyStatus.toRight, true);
+	enemies.push(newEnemy);
+	$(newEnemy.pos).addClass(enemyC);
 
 	setTimeout(function() {
-		createEnemy();
+		updateEnemyNumber();
 	}, getRandomTime());
 }
 
@@ -281,9 +285,9 @@ $(document).ready(function() {
 				resolveJumping();
 			}
 			updateEnemies();
-		}, 50);
+		}, 150);
 
 		setTimeout(function() {
-			createEnemy();
+			updateEnemyNumber();
 		}, getRandomTime());
 });
