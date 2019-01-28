@@ -12,18 +12,38 @@ var width = 25;
 var height = 3;
 var stairsForFloor = 2;
 
-function generateRandomPositionStair(){
-		var res = [];
-		var tmp = [];
-		for(var i = 1; i < width - 1; i++) {
-			tmp[i] = i;
+
+/*
+Create some random position to put the stair
+stairs: reference to other floor stairs
+*/
+function generateRandomPositionStair(stairs){
+	var res = [];
+	var tmp = [];
+	for(var i = 1; i < width - 1; i++) {
+		// To avoid merging of stairs from different floor
+		if(!stairs.includes(i - 1) && !stairs.includes(i) && !stairs.includes(i + 1)) {
+			tmp.push(i);
 		}
-		for(var i = 0; i < stairsForFloor; i++) {
-			var val = Math.round(Math.random() * (width - 1 - i));
-			res[i] = tmp[val];
-			tmp.slice(val, 1);
+	}
+	for(var i = 0; i < stairsForFloor; i++) {
+		var val = Math.round(Math.random() * (tmp.length - 1));
+		res[i] = tmp[val];
+		// normally slice three values to avoid next stairs, or two in edge
+		if(tmp.length > 2 && val != 0 && val != tmp.length - 1) {
+			tmp.splice(val - 1, 3);
+		} else if(tmp.length > 1 && val == tmp.length - 1) {
+			tmp.splice(val - 1, 2);
+		} else if(tmp.length > 1 && val == 0) {
+			tmp.splice(val, 2);
+		} else {
+			tmp.splice(val, 1);
 		}
-		return res;
+		console.log(val);
+		console.log(tmp);
+		console.log("uno " + i);
+	}
+	return res;
 }
 
 function generateFloor(stairs, holeRight) {
@@ -88,12 +108,13 @@ function generateAir(stairs) {
 
 function generateMap() {
 		var holeRight = true;
+		var stairs = [];
 		for(var j = 0; j < height - 1; j++) {
 				$("table").append(generateAir([]));
 		}
 		$("table").append(generateWalkable([], holeRight));
 		for(var i = 0; i < floor - 1; i++) {
-				var stairs = generateRandomPositionStair();
+				stairs = generateRandomPositionStair(stairs);
 				$("table").append(generateFloor(stairs, holeRight));
 				for(var j = 0; j < height - 1; j++) {
 						$("table").append(generateAir(stairs));
