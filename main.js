@@ -1,3 +1,4 @@
+var gameLoop;
 var tickTime = 150;
 var spawnMin = 2500;
 var spawnOffset = 1000;
@@ -6,6 +7,9 @@ var enemies = [];
 var player;
 
 var eventRecorded;
+var points = 0;
+var jumpPoints = 20;
+
 
 function resolveInputs() {
 	switch(eventRecorded) {
@@ -65,6 +69,7 @@ function resolveJumping() {
 		}
 
 	} else if(player.jumpCurrentStatus == jumpStatus.jumping) {
+		updateJumpPoints();
 		player.jumpCurrentStatus = jumpStatus.floating;
 	}
 }
@@ -86,7 +91,7 @@ function filterAliveEnemies(enemy) {
 function updateEnemyNumber() {
 	enemies = enemies.filter(filterAliveEnemies);
 
-	var newEnemy = new Enemy($("table tr:nth-child(" + height + ") td:first-child"), enemyStatus.toRight, true);
+	var newEnemy = new Enemy($("table tr:nth-child(" + (height + 1) + ") td:first-child"), enemyStatus.toRight, true);
 	enemies.push(newEnemy);
 	$(newEnemy.pos).addClass(enemyC);
 
@@ -95,6 +100,22 @@ function updateEnemyNumber() {
 	}, getRandomTime());
 }
 
+function updateJumpPoints() {
+	if(getBottomPos(player.pos).hasClass(enemyC)) {
+		points +=  jumpPoints;
+		console.log(points)
+		$("table caption span").text(points);
+	}
+}
+
+function checkCollision() {
+	if($(player.pos).hasClass(enemyC)) {
+		clearInterval(gameLoop);
+		setTimeout(function(){
+			location.reload();
+		}, 1000);
+	}
+}
 
 $(document).ready(function() {
 		$("div.matchResult").hide();
@@ -109,10 +130,12 @@ $(document).ready(function() {
 			eventRecorded = event.keyCode;
 		});
 
-		setInterval(function() {
+		gameLoop = setInterval(function() {
+			checkCollision();
 			if(player.jumpCurrentStatus == jumpStatus.floating || player.jumpCurrentStatus == jumpStatus.none) {
 				resolveInputs();
 				if(player.jumpCurrentStatus == jumpStatus.floating) {
+					updateJumpPoints();
 					player.jumpCurrentStatus = jumpStatus.falling;
 				}
 			} else {

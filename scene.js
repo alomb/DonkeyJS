@@ -39,9 +39,6 @@ function generateRandomPositionStair(stairs){
 		} else {
 			tmp.splice(val, 1);
 		}
-		console.log(val);
-		console.log(tmp);
-		console.log("uno " + i);
 	}
 	return res;
 }

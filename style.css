@@ -1,3 +1,25 @@
+* {
+    font-family: Arial;
+}
+
+header h1, main {
+    text-align: center;
+    width: 100%;
+}
+
+p {
+    line-height: 50%;
+}
+
+table {
+    margin: auto;
+    background-color: black;
+}
+
+table caption {
+    font-weight: bold;
+}
+
 td.floor {
     background-color: red;
     color: red;
