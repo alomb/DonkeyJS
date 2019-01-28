@@ -1,3 +1,7 @@
+var tickTime = 150;
+var spawnMin = 2500;
+var spawnOffset = 1000;
+
 var enemies = [];
 var player;
 
@@ -7,7 +11,7 @@ function resolveInputs() {
 	switch(eventRecorded) {
 		/*RIGHT*/
 		case 39:
-			var nextPos = $(player.pos).next("td");
+			var nextPos = getRightPos(player.pos);
 			if(nextPos.length > 0 && nextPos.hasClass(walkable)) {
 				player.swapPosition(nextPos);
 			} else if(nextPos.length > 0) {
@@ -17,7 +21,7 @@ function resolveInputs() {
 		break;
 		/*LEFT*/
 		case 37:
-			var nextPos = $(player.pos).prev("td");
+			var nextPos = getLeftPos(player.pos);
 			if(nextPos.length > 0 && nextPos.hasClass(walkable)) {
 				player.swapPosition(nextPos)
 			} else if(nextPos.length > 0) {
@@ -27,7 +31,7 @@ function resolveInputs() {
 		break;
 		/*UP*/
 		case 38:
-			var nextPos = $(player.pos).parent("tr").prev("tr").children('td:nth-child(' + ($(player.pos).prevAll("td").length + 1) + ')');
+			var nextPos = getTopPos(player.pos);
 			if($(nextPos).hasClass(walkable)) {
 				player.swapPosition(nextPos)
 			} else if(player.jumpCurrentStatus == jumpStatus.none) {
@@ -37,7 +41,7 @@ function resolveInputs() {
 		break;
 		/*DOWN*/
 		case 40:
-			var nextPos = $(player.pos).parent("tr").next("tr").children('td:nth-child(' + ($(player.pos).prevAll("td").length + 1) + ')');
+			var nextPos = getBottomPos(player.pos);
 			if($(nextPos).hasClass(walkable)) {
 				player.swapPosition(nextPos)
 			}
@@ -66,50 +70,12 @@ function resolveJumping() {
 }
 
 function getRandomTime() {
-	return Math.round(Math.random() * 2000) + 4500;
+	return Math.round(Math.random() * spawnOffset) + spawnMin;
 }
 
 function updateEnemies() {
 	$(enemies).each(function(index, enemy) {
-		switch (enemy.status) {
-			case enemyStatus.toRight:
-				var nextPos = $(enemy.pos).next("td");
-				if(nextPos.length == 0) {
-					enemy.delete();
-				} else {
-					enemy.swapPosition(nextPos);
-					if(!nextPos.hasClass(walkable)) {
-						enemy.status = enemyStatus.fallingThenLeft;
-					}
-				}
-				break;
-			case enemyStatus.fallingThenLeft:
-				var nextPos = $(enemy.pos).parent("tr").next("tr").children('td:nth-child(' + ($(enemy.pos).prevAll("td").length + 1) + ')');
-				enemy.swapPosition(nextPos);
-				if(nextPos.hasClass(walkable)) {
-					enemy.status = enemyStatus.toLeft;
-				}
-				break;
-			case enemyStatus.toLeft:
-				var nextPos = $(enemy.pos).prev("td");
-				if(nextPos.length == 0) {
-					enemy.delete();
-				} else {
-					enemy.swapPosition(nextPos);
-					if(!nextPos.hasClass(walkable)) {
-						enemy.status = enemyStatus.fallingThenRight;
-					}
-				}
-				break;
-			case enemyStatus.fallingThenRight:
-				var nextPos = $(enemy.pos).parent("tr").next("tr").children('td:nth-child(' + ($(enemy.pos).prevAll("td").length + 1) + ')');
-				enemy.swapPosition(nextPos);
-				if(nextPos.hasClass(walkable)) {
-					enemy.status = enemyStatus.toRight;
-				}
-				break;
-			default:
-		}
+		enemy.update();
 	});
 }
 
@@ -153,7 +119,7 @@ $(document).ready(function() {
 				resolveJumping();
 			}
 			updateEnemies();
-		}, 150);
+		}, tickTime);
 
 		setTimeout(function() {
 			updateEnemyNumber();
