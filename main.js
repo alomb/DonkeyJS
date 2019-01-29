@@ -20,7 +20,8 @@ function resolveInputs() {
 				player.swapPosition(nextPos);
 			} else if(nextPos.length > 0) {
 				player.jumpCurrentStatus = jumpStatus.falling;
-				player.swapPosition(nextPos)
+				player.swapPosition(nextPos);
+				updateJumpPoints();
 			}
 		break;
 		/*LEFT*/
@@ -30,7 +31,8 @@ function resolveInputs() {
 				player.swapPosition(nextPos)
 			} else if(nextPos.length > 0) {
 				player.jumpCurrentStatus = jumpStatus.falling;
-				player.swapPosition(nextPos)
+				player.swapPosition(nextPos);
+				updateJumpPoints();
 			}
 		break;
 		/*UP*/
@@ -57,6 +59,7 @@ function resolveInputs() {
 
 function resolveJumping() {
 	if(player.jumpCurrentStatus == jumpStatus.falling) {
+		updateJumpPoints();
 		eventRecorded = undefined;
 		if($(player.pos).hasClass(walkable)) {
 			player.jumpCurrentStatus = jumpStatus.none;
@@ -67,7 +70,6 @@ function resolveJumping() {
 				player.jumpCurrentStatus = jumpStatus.none;
 			}
 		}
-
 	} else if(player.jumpCurrentStatus == jumpStatus.jumping) {
 		updateJumpPoints();
 		player.jumpCurrentStatus = jumpStatus.floating;
@@ -91,7 +93,7 @@ function filterAliveEnemies(enemy) {
 function updateEnemyNumber() {
 	enemies = enemies.filter(filterAliveEnemies);
 
-	var newEnemy = new Enemy($("table tr:nth-child(" + (height + 1) + ") td:first-child"), enemyStatus.toRight, true);
+	var newEnemy = new Enemy($("table tr:nth-child(" + (height) + ") td:first-child"), enemyStatus.toRight, true);
 	enemies.push(newEnemy);
 	$(newEnemy.pos).addClass(enemyC);
 
@@ -103,8 +105,7 @@ function updateEnemyNumber() {
 function updateJumpPoints() {
 	if(getBottomPos(player.pos).hasClass(enemyC)) {
 		points +=  jumpPoints;
-		console.log(points)
-		$("table caption span").text(points);
+		$("span.points").text(points);
 	}
 }
 
@@ -122,15 +123,18 @@ $(document).ready(function() {
 		generateMap();
 
 		player = new Player($("table tr:last-child").prev().children("td:first-child"));
+		$(".canvas").scrollTop(player.pos[0].offsetTop - $(".canvas").height() / 2);
 		$(player.pos).addClass(backgroundC);
 		$(player.pos).addClass(walkable);
 		$(player.pos).addClass(playerC);
 
 		document.addEventListener('keydown', function(event){
 			eventRecorded = event.keyCode;
+			event.preventDefault();
 		});
 
 		gameLoop = setInterval(function() {
+			console.log(player.jumpCurrentStatus);
 			checkCollision();
 			if(player.jumpCurrentStatus == jumpStatus.floating || player.jumpCurrentStatus == jumpStatus.none) {
 				resolveInputs();

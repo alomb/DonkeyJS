@@ -8,7 +8,7 @@ var floorC = "floor";
 var enemyC = "enemy";
 
 var floor = 6;
-var width = 25;
+var width = 20;
 var height = 3;
 var stairsForFloor = 2;
 

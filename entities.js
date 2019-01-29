@@ -98,6 +98,7 @@ function Player(pos) {
     	$(this.pos).removeClass(playerC);
     	this.pos = nextPos;
     	$(this.pos).addClass(playerC);
-    };
+		$(".canvas").scrollTop(this.pos[0].offsetTop - $(".canvas").height() / 2);		
+	};
 
 }

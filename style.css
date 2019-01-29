@@ -11,12 +11,17 @@ p {
     line-height: 50%;
 }
 
+.canvas {
+	height: 500px;
+	overflow-y: auto;
+}
+
 table {
-    margin: auto;
+	margin: auto;
     background-color: black;
 }
 
-table caption {
+.points {
     font-weight: bold;
 }
 
