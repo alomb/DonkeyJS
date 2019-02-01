@@ -21,7 +21,7 @@ table {
     background-color: black;
 }
 
-.points {
+.points, .lives, .levels {
     font-weight: bold;
 }
 

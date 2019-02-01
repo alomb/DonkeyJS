@@ -7,10 +7,13 @@ var stairC = "stair";
 var floorC = "floor";
 var enemyC = "enemy";
 
-var floor = 6;
-var width = 20;
-var height = 3;
-var stairsForFloor = 2;
+var initialFloor = 6;
+var initialWidth = 20;
+var initialHeight = 3;
+var floor = initialFloor;
+var width = initialWidth;
+var height = initialHeight;
+var stairsForFloor = Math.round(initialWidth / 10);
 
 
 /*
